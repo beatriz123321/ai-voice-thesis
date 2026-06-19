@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VoyageAI — Meet John</title>
+  <style>
+    /* ─── Reset & Tokens ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy:      #0d1b3e;
+      --navy-mid:  #162447;
+      --navy-hi:   #1e3566;
+      --cream:     #f5f4f1;
+      --white:     #ffffff;
+      --blue:      #5b9ec9;
+      --blue-dim:  #8ab4cf;
+      --gold:      #c8a96e;
+      --text:      #1c1c2e;
+      --muted:     #6b7280;
+      --border:    #e4e2de;
+      --sel-bg:    #eaf3f9;
+      --sel-bdr:   #5b9ec9;
+      --r:         12px;
+      --t:         0.28s ease;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Nav ─── */
+    #nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 24px;
+    }
+    #nav.dk { background: rgba(13,27,62,.95); backdrop-filter: blur(10px); }
+    #nav.lt {
+      background: rgba(245,244,241,.95); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo { font-size: 17px; font-weight: 700; letter-spacing: -.3px; }
+    #nav.dk .logo { color: #fff; }
+    #nav.lt .logo { color: var(--navy); }
+    .logo span { color: var(--blue-dim); }
+    .badge { font-size: 12px; font-weight: 500; padding: 5px 13px; border-radius: 20px; }
+    #nav.dk .badge { background: rgba(255,255,255,.12); color: rgba(255,255,255,.85); border: 1px solid rgba(255,255,255,.2); }
+    #nav.lt .badge { background: rgba(13,27,62,.07); color: var(--navy); border: 1px solid rgba(13,27,62,.14); }
+
+    /* ─── Screens ─── */
+    .screen { display: none; }
+    .screen.on { display: block; }
+    .fade-in { animation: fadein .38s ease both; }
+    @keyframes fadein { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+    /* ─── INTRO: Hero ─── */
+    .hero {
+      background: var(--navy); min-height: 100svh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 96px 28px 72px; text-align: center;
+    }
+    .eyebrow {
+      font-size: 10px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+    .hero .eyebrow { color: var(--blue-dim); }
+    .hero-avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      border: 1.5px solid rgba(138,180,207,.35);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 28px; color: var(--blue-dim);
+    }
+    .hero h1 {
+      font-size: clamp(26px,6vw,40px); font-weight: 700; line-height: 1.2;
+      color: #fff; margin-bottom: 14px;
+    }
+    .hero > p {
+      font-size: 15px; line-height: 1.65; color: rgba(255,255,255,.65);
+      max-width: 340px; margin: 0 auto 44px;
+    }
+    .btn-start {
+      display: inline-flex; align-items: center; gap: 9px;
+      padding: 14px 28px; border-radius: 40px;
+      background: transparent; border: 1.5px solid rgba(255,255,255,.38);
+      color: #fff; font-size: 15px; font-weight: 500; cursor: pointer;
+      transition: background var(--t), border-color var(--t);
+    }
+    .btn-start:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.65); }
+    .scroll-cue {
+      margin-top: 52px; color: rgba(255,255,255,.3); font-size: 12px;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      animation: bob 2.2s ease-in-out infinite;
+    }
+    @keyframes bob { 0%,100%{transform:none} 55%{transform:translateY(7px)} }
+
+    /* ─── INTRO: What to expect ─── */
+    .expect {
+      background: var(--cream); padding: 60px 28px 56px; text-align: center;
+    }
+    .expect .eyebrow { color: var(--muted); margin-bottom: 44px; display: block; }
+    .expect-cols {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 28px;
+      max-width: 520px; margin: 0 auto 44px;
+    }
+    @media (max-width: 420px) { .expect-cols { grid-template-columns: 1fr; } }
+    .ec { text-align: center; }
+    .ec-ico { color: var(--blue); margin-bottom: 14px; }
+    .ec h3 { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    .ec p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .privacy {
+      display: flex; align-items: flex-start; gap: 9px;
+      max-width: 460px; margin: 0 auto;
+      font-size: 13px; color: var(--muted); line-height: 1.55; text-align: left;
+    }
+    .privacy svg { flex-shrink: 0; margin-top: 1px; }
+
+    /* ─── CONVERSATION ─── */
+    .conv-wrap {
+      max-width: 620px; margin: 0 auto;
+      padding: 88px 24px 96px;
+      min-height: 100svh; display: flex; flex-direction: column;
+    }
+    .conv-eyebrow {
+      font-size: 10px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 10px; margin-top: 4px;
+    }
+    #cTitle { font-size: clamp(22px,5vw,30px); font-weight: 700; margin-bottom: 6px; }
+    #cSub { font-size: 14px; color: var(--muted); margin-bottom: 28px; line-height: 1.55; }
+
+    /* Speaking card */
+    .sp-card {
+      background: var(--white); border: 1px solid var(--border); border-radius: var(--r);
+      padding: 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06); transition: border-color var(--t);
+    }
+    .sp-card.live { border-color: rgba(91,158,201,.45); }
+    .sp-ava {
+      width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
+      background: var(--navy); display: flex; align-items: center; justify-content: center;
+      color: var(--blue-dim);
+    }
+    .sp-txt { flex: 1; min-width: 0; }
+    .sp-status {
+      font-size: 13px; font-weight: 600; color: var(--text);
+      margin-bottom: 4px; display: flex; align-items: center; gap: 7px;
+    }
+    .sp-dot {
+      width: 7px; height: 7px; border-radius: 50%; background: #22c55e;
+      animation: pulse 1.4s ease-in-out infinite; flex-shrink: 0;
+    }
+    .sp-dot.off { visibility: hidden; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.75)} }
+    .sp-quote { font-size: 13px; color: var(--muted); line-height: 1.45; font-style: italic; }
+
+    /* Waveform */
+    .waveform { display: flex; align-items: center; gap: 3px; height: 28px; flex-shrink: 0; }
+    .wb { width: 3px; border-radius: 2px; background: var(--blue); opacity: .3; }
+    .wb:nth-child(1){height:5px}  .wb:nth-child(2){height:13px}
+    .wb:nth-child(3){height:9px}  .wb:nth-child(4){height:17px}
+    .wb:nth-child(5){height:7px}  .wb:nth-child(6){height:15px}
+    .wb:nth-child(7){height:11px} .wb:nth-child(8){height:19px}
+    .wb:nth-child(9){height:6px}
+    .waveform.live .wb { opacity: .85; }
+    .waveform.live .wb:nth-child(1){animation:wv 1.1s .00s ease-in-out infinite}
+    .waveform.live .wb:nth-child(2){animation:wv 1.1s .08s ease-in-out infinite}
+    .waveform.live .wb:nth-child(3){animation:wv 1.1s .16s ease-in-out infinite}
+    .waveform.live .wb:nth-child(4){animation:wv 1.1s .24s ease-in-out infinite}
+    .waveform.live .wb:nth-child(5){animation:wv 1.1s .12s ease-in-out infinite}
+    .waveform.live .wb:nth-child(6){animation:wv 1.1s .20s ease-in-out infinite}
+    .waveform.live .wb:nth-child(7){animation:wv 1.1s .04s ease-in-out infinite}
+    .waveform.live .wb:nth-child(8){animation:wv 1.1s .28s ease-in-out infinite}
+    .waveform.live .wb:nth-child(9){animation:wv 1.1s .18s ease-in-out infinite}
+    @keyframes wv { 0%,100%{height:4px} 50%{height:22px} }
+
+    .replay-btn {
+      background: none; border: none; cursor: pointer; padding: 0;
+      font-size: 12px; color: var(--blue);
+      display: none; align-items: center; gap: 5px;
+      margin-bottom: 20px; margin-top: 6px;
+      text-decoration: underline; text-underline-offset: 2px;
+    }
+    .replay-btn:hover { color: var(--navy); }
+
+    /* Options */
+    .q-label { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+    .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+    .opt {
+      display: flex; align-items: center; gap: 11px;
+      padding: 14px 16px; border-radius: var(--r);
+      border: 1.5px solid var(--border); background: var(--white);
+      cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text);
+      transition: border-color var(--t), background var(--t), opacity var(--t);
+      -webkit-tap-highlight-color: transparent; text-align: left; line-height: 1.35;
+    }
+    .opt:hover { border-color: var(--blue); background: var(--sel-bg); }
+    .opt.sel { border-color: var(--sel-bdr); background: var(--sel-bg); }
+    .opt.disabled-opt { opacity: .38; pointer-events: none; }
+    .opt-ico { font-size: 17px; flex-shrink: 0; }
+
+    /* Next button */
+    .btn-next {
+      width: 100%; padding: 15px; border-radius: var(--r);
+      background: var(--navy); color: #fff; border: none;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: background var(--t), opacity var(--t);
+    }
+    .btn-next:hover:not(:disabled) { background: var(--navy-hi); }
+    .btn-next:disabled { opacity: .35; cursor: default; }
+
+    /* Progress */
+    .progress { margin-top: auto; padding-top: 32px; }
+    .prog-lbl { font-size: 13px; color: var(--muted); margin-bottom: 9px; }
+    .prog-track { height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .prog-fill { height: 100%; background: var(--blue); border-radius: 2px; transition: width .4s ease; }
+
+    /* ─── RESULT ─── */
+    .res-hero { background: var(--navy); padding: 96px 28px 44px; text-align: center; }
+    .res-badge {
+      display: inline-block; font-size: 12px; font-weight: 500;
+      padding: 5px 15px; border-radius: 20px;
+      background: rgba(255,255,255,.1); color: rgba(255,255,255,.8); margin-bottom: 18px;
+    }
+    .res-city {
+      font-size: clamp(34px,8vw,52px); font-weight: 700; letter-spacing: -.5px;
+      color: var(--gold); margin-bottom: 6px;
+    }
+    .res-country { font-size: 17px; color: rgba(255,255,255,.55); margin-bottom: 32px; }
+    .res-tags { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .res-tag {
+      display: flex; flex-direction: column; align-items: center; gap: 7px;
+      padding: 12px 18px; border-radius: 10px; min-width: 70px;
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.11);
+    }
+    .res-tag-ico { font-size: 18px; }
+    .res-tag-lbl { font-size: 11px; color: rgba(255,255,255,.6); font-weight: 500; }
+
+    .res-body {
+      max-width: 620px; margin: 0 auto;
+      padding: 36px 24px 52px;
+    }
+
+    /* John says (static quote after audio) */
+    .aria-says {
+      display: flex; gap: 14px; margin-bottom: 28px;
+      padding-bottom: 28px; border-bottom: 1px solid var(--border);
+    }
+    .as-ava {
+      width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+      background: var(--navy); display: flex; align-items: center; justify-content: center;
+      color: var(--blue-dim);
+    }
+    .as-lbl { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 7px; }
+    .as-quote { font-size: 14px; color: var(--text); line-height: 1.65; font-style: italic; }
+
+    .res-meta {
+      display: flex; flex-wrap: wrap; gap: 12px 22px; margin-bottom: 32px;
+      padding-bottom: 28px; border-bottom: 1px solid var(--border);
+    }
+    .meta-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+
+    .btn-survey {
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+      width: 100%; padding: 16px; border-radius: var(--r);
+      background: var(--navy); color: #fff; border: none;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: background var(--t); margin-bottom: 14px;
+    }
+    .btn-survey:hover { background: var(--navy-hi); }
+    .survey-note { text-align: center; font-size: 13px; color: var(--muted); }
+
+    /* ─── Version label ─── */
+    .ver-tag {
+      font-size: 12px; font-weight: 700; padding: 5px 13px; border-radius: 20px;
+      letter-spacing: .4px; white-space: nowrap;
+    }
+    #nav.dk .ver-tag { background: rgba(200,169,110,.18); color: var(--gold); border: 1px solid rgba(200,169,110,.38); }
+    #nav.lt .ver-tag { background: rgba(13,27,62,.07); color: var(--navy); border: 1px solid rgba(13,27,62,.2); }
+    .ver-hero {
+      font-size: clamp(36px,9vw,64px); font-weight: 800; color: var(--gold);
+      letter-spacing: -1.5px; margin-bottom: 20px; margin-top: -4px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Nav ── -->
+<nav id="nav" class="dk">
+  <div class="logo">Voyage<span>AI</span></div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span class="ver-tag">Version B</span>
+    <span class="badge">Research study</span>
+  </div>
+</nav>
+
+<!-- ══════════ INTRO ══════════ -->
+<div id="s-intro" class="screen on">
+  <div class="hero fade-in">
+    <p class="eyebrow">University Research Study</p>
+    <div class="hero-avatar">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/>
+      </svg>
+    </div>
+    <h1>Meet John, your AI<br>travel assistant</h1>
+    <div class="ver-hero">Version B</div>
+    <p>John will ask you a few questions about your travel style and suggest the perfect destination, just for you.</p>
+    <button class="btn-start" onclick="startExp()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      Start the experience
+    </button>
+    <div class="scroll-cue">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 5v14M5 12l7 7 7-7"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="expect">
+    <span class="eyebrow">What to expect</span>
+    <div class="expect-cols">
+      <div class="ec">
+        <div class="ec-ico">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+          </svg>
+        </div>
+        <h3>Listen</h3>
+        <p>John speaks to you. Use headphones for best results</p>
+      </div>
+      <div class="ec">
+        <div class="ec-ico">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M18 11V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2 2 2 0 0 0-2 2v2"/>
+            <path d="M10 10.5V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v8"/>
+            <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>
+          </svg>
+        </div>
+        <h3>Choose</h3>
+        <p>Pick your answer from a few options on screen</p>
+      </div>
+      <div class="ec">
+        <div class="ec-ico">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+        </div>
+        <h3>Discover</h3>
+        <p>John recommends your perfect destination</p>
+      </div>
+    </div>
+    <div class="privacy">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted)">
+        <rect x="3" y="11" width="18" height="11" rx="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+      Your responses are anonymous and used only for academic research. The experience takes approximately 3 minutes.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ CONVERSATION ══════════ -->
+<div id="s-conv" class="screen">
+  <div class="conv-wrap">
+    <p class="conv-eyebrow">Your Travel Assistant</p>
+    <h1 id="cTitle"></h1>
+    <p id="cSub"></p>
+
+    <!-- Speaking card -->
+    <div class="sp-card live" id="spCard">
+      <div class="sp-ava">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+          <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+        </svg>
+      </div>
+      <div class="sp-txt">
+        <div class="sp-status">
+          <span id="spStatus">John is speaking…</span>
+          <span class="sp-dot" id="spDot"></span>
+        </div>
+        <div class="sp-quote" id="spQuote"></div>
+      </div>
+      <div class="waveform live" id="wf">
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+      </div>
+    </div>
+
+    <button class="replay-btn" id="replayBtn" onclick="replayAudio()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 .49-3.75"/>
+      </svg>
+      Replay John's message
+    </button>
+
+    <p class="q-label" id="qLabel" style="display:none"></p>
+    <div class="opts" id="opts" style="display:none"></div>
+
+    <button class="btn-next" id="btnNext" disabled onclick="goNext()">Continue</button>
+
+    <div class="progress">
+      <p class="prog-lbl" id="progLbl"></p>
+      <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ RESULT ══════════ -->
+<div id="s-result" class="screen">
+  <div class="res-hero">
+    <div class="ver-hero">Version B</div>
+    <div class="res-badge">John's recommendation</div>
+    <h1 class="res-city" id="rCity"></h1>
+    <p class="res-country" id="rCountry"></p>
+    <div class="res-tags" id="rTags"></div>
+  </div>
+  <div class="res-body">
+
+    <!-- Speaking card (result audio) -->
+    <div class="sp-card live" id="rSpCard" style="margin-bottom:24px">
+      <div class="sp-ava">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/>
+        </svg>
+      </div>
+      <div class="sp-txt">
+        <div class="sp-status">
+          <span>John is speaking…</span>
+          <span class="sp-dot" id="rSpDot"></span>
+        </div>
+        <div class="sp-quote" id="rSpQuote"></div>
+      </div>
+      <div class="waveform live" id="rWf">
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+      </div>
+    </div>
+
+    <!-- Static quote shown after audio ends -->
+    <div class="aria-says" id="ariaSays" style="display:none">
+      <div class="as-ava">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/>
+        </svg>
+      </div>
+      <div>
+        <p class="as-lbl">John says</p>
+        <p class="as-quote" id="asQuote"></p>
+      </div>
+    </div>
+
+    <div class="res-meta" id="rMeta"></div>
+
+    <button class="btn-survey" onclick="goSurvey()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+        <rect x="9" y="3" width="6" height="4" rx="1"/>
+        <path d="M9 12h6M9 16h4"/>
+      </svg>
+      Continue to the survey
+    </button>
+    <p class="survey-note">Takes about 3 minutes — thank you for participating!</p>
+  </div>
+</div>
+
+<!--
+  ── AUDIO FILES ──────────────────────────────────────────────────────
+  Place your .mp3 recordings in the audio/ folder.
+  Each question has: an intro clip, one response clip per option, and
+  a transition clip that bridges to the next question.
+  See audio/README.txt for the full filename list.
+  If a file is missing the interface auto-advances after the fallback
+  duration defined in the STEPS data in the script below.
+-->
+<!-- Intro -->
+<audio id="au-greeting" src="audio/greeting.mp3"       preload="auto"></audio>
+<!-- Question 1 -->
+<audio id="au-q1-intro" src="audio/q1_intro.mp3"       preload="auto"></audio>
+<audio id="au-q1-r0"    src="audio/q1_beach.mp3"       preload="auto"></audio>
+<audio id="au-q1-r1"    src="audio/q1_cities.mp3"      preload="auto"></audio>
+<audio id="au-q1-r2"    src="audio/q1_nature.mp3"      preload="auto"></audio>
+<audio id="au-q1-r3"    src="audio/q1_food.mp3"        preload="auto"></audio>
+<audio id="au-q1-tr"    src="audio/q1_transition.mp3"  preload="auto"></audio>
+<!-- Question 2 -->
+<audio id="au-q2-intro" src="audio/q2_intro.mp3"       preload="auto"></audio>
+<audio id="au-q2-r0"    src="audio/q2_peaceful.mp3"    preload="auto"></audio>
+<audio id="au-q2-r1"    src="audio/q2_adventurous.mp3" preload="auto"></audio>
+<audio id="au-q2-r2"    src="audio/q2_cultural.mp3"    preload="auto"></audio>
+<audio id="au-q2-r3"    src="audio/q2_social.mp3"      preload="auto"></audio>
+<audio id="au-q2-tr"    src="audio/q2_transition.mp3"  preload="auto"></audio>
+<!-- Question 3 -->
+<audio id="au-q3-intro" src="audio/q3_intro.mp3"       preload="auto"></audio>
+<audio id="au-q3-r0"    src="audio/q3_solo.mp3"        preload="auto"></audio>
+<audio id="au-q3-r1"    src="audio/q3_partner.mp3"     preload="auto"></audio>
+<audio id="au-q3-r2"    src="audio/q3_friends.mp3"     preload="auto"></audio>
+<audio id="au-q3-r3"    src="audio/q3_family.mp3"      preload="auto"></audio>
+<audio id="au-q3-tr"    src="audio/q3_transition.mp3"  preload="auto"></audio>
+<!-- Question 4 -->
+<audio id="au-q4-intro" src="audio/q4_intro.mp3"       preload="auto"></audio>
+<audio id="au-q4-r0"    src="audio/q4_weekend.mp3"     preload="auto"></audio>
+<audio id="au-q4-r1"    src="audio/q4_week.mp3"        preload="auto"></audio>
+<audio id="au-q4-r2"    src="audio/q4_twoweeks.mp3"    preload="auto"></audio>
+<audio id="au-q4-r3"    src="audio/q4_month.mp3"       preload="auto"></audio>
+<audio id="au-q4-tr"    src="audio/q4_transition.mp3"  preload="auto"></audio>
+<!-- Recommendation -->
+<audio id="au-result"   src="audio/recommendation.mp3" preload="auto"></audio>
+
+<script>
+// ── CONFIG ───────────────────────────────────────────────────────────
+const SURVEY_URL = 'https://uva.fra1.qualtrics.com/jfe/form/SV_6fp5hW4jNpMX03A';
+
+// ── STEP DATA ────────────────────────────────────────────────────────
+// Each step has: intro audio (plays when step loads), per-option response
+// audio (plays after user clicks Next), and an optional transition audio
+// (plays after the response, before advancing to the next step).
+const STEPS = [
+  {
+    title: "Hi, I'm John 👋",
+    sub:   "I'll help you find your perfect destination. Just listen and choose!",
+    quote: '"Hey, welcome back! Great to have you here again. This time, I\'d love for you to approach the questions a little differently. Maybe choose options you wouldn\'t normally pick, or imagine a completely different kind of trip than last time. There are no right or wrong answers, so just go with whatever feels fun to explore."',
+    audio: 'au-greeting', dur: 22000,
+    q: null, opts: null,
+    btn: "Let's get started", step: 1, total: 5,
+  },
+  {
+    title: "A question for you",
+    sub:   "Listen to John, then select your answer.",
+    quote: '"First things first… what usually pulls you into a trip? What kind of experience feels exciting to you right now?"',
+    audio: 'au-q1-intro', dur: 9000,
+    q: 'What kind of traveler are you?',
+    opts: [
+      {
+        e: '🏖️', l: 'Relaxing on the beach',
+        responseAudio: 'au-q1-r0', responseDur: 10000,
+        responseText: '"Ahh, the beach… warm sun, salty air, and the sound of waves slowing everything down. That kind of escape can feel like a reset button for the mind."',
+      },
+      {
+        e: '🏙️', l: 'Exploring cities',
+        responseAudio: 'au-q1-r1', responseDur: 11000,
+        responseText: '"Ooh, city energy. Hidden cafés, lively streets, late-night walks, and something new around every corner. You seem like someone who enjoys discovering places with personality."',
+      },
+      {
+        e: '🌿', l: 'Nature & hiking',
+        responseAudio: 'au-q1-r2', responseDur: 11000,
+        responseText: '"There\'s something special about nature, isn\'t there? Fresh air, beautiful views, quiet trails… sometimes the best experiences happen far away from the noise."',
+      },
+      {
+        e: '🍽️', l: 'Food & culture',
+        responseAudio: 'au-q1-r3', responseDur: 11000,
+        responseText: '"Now that sounds delicious already. Local food, traditions, music, architecture… you\'re the kind of traveler who wants to really feel a place, not just visit it."',
+      },
+    ],
+    transitionAudio: 'au-q1-tr', transitionDur: 9000,
+    transitionText: '"Okay, I think I\'m starting to understand your style a little better. Let\'s talk about the kind of atmosphere you\'re hoping for."',
+    btn: 'Next', step: 2, total: 5,
+  },
+  {
+    title: "Getting to know you",
+    sub:   "Listen to John, then select your answer.",
+    quote: '"When you imagine your ideal trip… what does it feel like? What kind of energy are you looking for?"',
+    audio: 'au-q2-intro', dur: 8000,
+    q: "What's your ideal trip vibe?",
+    opts: [
+      {
+        e: '😌', l: 'Slow & peaceful',
+        responseAudio: 'au-q2-r0', responseDur: 9000,
+        responseText: '"Mmm, slow and peaceful. No rushing, no pressure. Just calm mornings, relaxing moments, and time to fully breathe."',
+      },
+      {
+        e: '🧗', l: 'Active & adventurous',
+        responseAudio: 'au-q2-r1', responseDur: 11000,
+        responseText: '"Adventure mode activated. You sound like someone who wants stories to tell: exploring, moving, trying new things, maybe even stepping a little outside your comfort zone."',
+      },
+      {
+        e: '🏛️', l: 'Cultural & historic',
+        responseAudio: 'au-q2-r2', responseDur: 11000,
+        responseText: '"I like that. Places with history have a way of making travel feel meaningful: old streets, local stories, timeless landmarks… there\'s depth in that kind of journey."',
+      },
+      {
+        e: '🎉', l: 'Lively & social',
+        responseAudio: 'au-q2-r3', responseDur: 10000,
+        responseText: '"Sounds fun already. Busy streets, music, nightlife, meeting people... You\'re looking for a trip that feels alive from morning to midnight."',
+      },
+    ],
+    transitionAudio: 'au-q2-tr', transitionDur: 6000,
+    transitionText: '"Got it. Now, onto something that can really shape the whole experience:"',
+    btn: 'Next', step: 3, total: 5,
+  },
+  {
+    title: "Almost there",
+    sub:   "Listen to John, then select your answer.",
+    quote: '"Is anyone joining this adventure with you?"',
+    audio: 'au-q3-intro', dur: 7000,
+    q: 'Who are you traveling with?',
+    opts: [
+      {
+        e: '🧍', l: 'Going solo',
+        responseAudio: 'au-q3-r0', responseDur: 10000,
+        responseText: '"Solo travel can be incredibly freeing. You get to follow your own rhythm, explore what truly interests you, and create a trip that\'s completely personal."',
+      },
+      {
+        e: '💑', l: 'With a partner',
+        responseAudio: 'au-q3-r1', responseDur: 11000,
+        responseText: '"A trip with someone special… that changes the feeling entirely. Shared sunsets, little memories, spontaneous moments... Those trips tend to stay with people for a long time."',
+      },
+      {
+        e: '👯', l: 'With friends',
+        responseAudio: 'au-q3-r2', responseDur: 10000,
+        responseText: '"Oh, that usually means good stories already. Trips with friends are all about laughs, shared adventures, and memories that get talked about for years."',
+      },
+      {
+        e: '👨‍👩‍👧', l: 'With family',
+        responseAudio: 'au-q3-r3', responseDur: 10000,
+        responseText: '"Family trips have their own kind of magic. Finding somewhere everyone can enjoy together can turn simple moments into unforgettable memories."',
+      },
+    ],
+    transitionAudio: 'au-q3-tr', transitionDur: 7000,
+    transitionText: '"Alright… last question. This one helps me picture the pace of your getaway."',
+    btn: 'Next', step: 4, total: 5,
+  },
+  {
+    title: "Last question",
+    sub:   "Listen to John, then select your answer.",
+    quote: '"How much time are you imagining for this escape?"',
+    audio: 'au-q4-intro', dur: 5000,
+    q: 'How long is your ideal trip?',
+    opts: [
+      {
+        e: '📅', l: 'A long weekend',
+        responseAudio: 'au-q4-r0', responseDur: 8000,
+        responseText: '"Sometimes a few days is all you need. A quick escape can recharge you more than people expect."',
+      },
+      {
+        e: '🗓️', l: 'About a week',
+        responseAudio: 'au-q4-r1', responseDur: 9000,
+        responseText: '"A week is such a sweet spot. Long enough to settle in, explore properly, and still leave wanting just a little more."',
+      },
+      {
+        e: '✈️', l: 'Two weeks',
+        responseAudio: 'au-q4-r2', responseDur: 9000,
+        responseText: '"Now we\'re talking. Two weeks gives you time to really disconnect from everyday life and sink into the experience."',
+      },
+      {
+        e: '🌍', l: 'A month or more',
+        responseAudio: 'au-q4-r3', responseDur: 9000,
+        responseText: '"That sounds like a true adventure. A month away isn\'t just a trip, it starts becoming a different way of living."',
+      },
+    ],
+    transitionAudio: 'au-q4-tr', transitionDur: 13000,
+    transitionText: '"Perfect… I think I\'ve got a pretty good sense of your travel personality now. Give me a second to find a destination that fits your vibe."',
+    btn: 'Find my destination', step: 5, total: 5,
+  },
+];
+
+// ── DESTINATION (pre-scripted for experimental consistency) ──────────
+const DEST = {
+  city: 'Barcelona', country: 'Spain',
+  tags: [
+    { e: '☀️', l: 'Sunny'     }, { e: '🍽️', l: 'Food'      },
+    { e: '🏛️', l: 'Culture'   }, { e: '🏖️', l: 'Beach'     },
+  ],
+  quote: '"So based on everything you told me, Barcelona feels like a perfect match for you! It has that balance of culture, atmosphere, amazing food, and relaxed energy that I think you\'d really connect with. I can already picture you wandering through the streets there!"',
+  audioDur: 20000,
+  meta: [
+    { e: '✓',  l: 'Matches your vibe' },
+    { e: '🕐', l: 'Best Apr – Oct'    },
+    { e: '💶', l: 'Mid-range'         },
+    { e: '🌐', l: 'English spoken'    },
+  ],
+};
+
+// ── STATE ────────────────────────────────────────────────────────────
+let step = 0, sel = null, playing = false, timer = null, activeAudio = null;
+
+// ── UTILS ────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+function setNav(cls) { $('nav').className = cls; }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  const el = $(id);
+  el.classList.add('on', 'fade-in');
+  el.addEventListener('animationend', () => el.classList.remove('fade-in'), { once: true });
+  window.scrollTo(0, 0);
+}
+
+function stopAudio() {
+  if (timer) { clearTimeout(timer); timer = null; }
+  if (activeAudio) { activeAudio.pause(); activeAudio.onended = null; activeAudio = null; }
+}
+
+// ── INTRO ────────────────────────────────────────────────────────────
+function startExp() {
+  setNav('lt');
+  showScreen('s-conv');
+  loadStep(0);
+}
+
+// ── CONVERSATION ─────────────────────────────────────────────────────
+function loadStep(i) {
+  step = i; sel = null;
+  const s = STEPS[i];
+
+  $('cTitle').textContent = s.title;
+  $('cSub').textContent   = s.sub;
+
+  $('spQuote').textContent  = s.quote;
+  $('spStatus').textContent = 'John is speaking…';
+  $('spDot').classList.remove('off');
+  $('spCard').classList.add('live');
+  $('wf').classList.add('live');
+  $('replayBtn').style.display = 'none';
+  $('btnNext').style.display   = '';
+
+  const qEl = $('qLabel'), optsEl = $('opts');
+  if (s.q) {
+    qEl.textContent      = s.q;
+    qEl.style.display    = 'block';
+    optsEl.style.display = 'grid';
+    optsEl.innerHTML     = s.opts.map((o, idx) =>
+      `<button class="opt disabled-opt" onclick="pick(${idx}, this)">
+        <span class="opt-ico">${o.e}</span><span>${o.l}</span>
+       </button>`
+    ).join('');
+  } else {
+    qEl.style.display    = 'none';
+    optsEl.style.display = 'none';
+  }
+
+  $('btnNext').textContent  = s.btn;
+  $('btnNext').disabled     = true;
+  $('progLbl').textContent  = `Step ${s.step} of ${s.total}`;
+  $('progFill').style.width = `${(s.step / s.total) * 100}%`;
+
+  playAudio(s.audio, s.dur, () => onConvAudioDone(s));
+}
+
+function playAudio(audioId, fallbackDur, onDone) {
+  stopAudio();
+  playing = true;
+  const el = $(audioId);
+  activeAudio = el;
+
+  const done = () => { playing = false; onDone(); };
+
+  if (el) {
+    el.currentTime = 0;
+    const p = el.play();
+    if (p) {
+      p.then(() => { el.onended = done; })
+       .catch(() => { timer = setTimeout(done, fallbackDur); });
+    } else {
+      timer = setTimeout(done, fallbackDur);
+    }
+  } else {
+    timer = setTimeout(done, fallbackDur);
+  }
+}
+
+function onConvAudioDone(s) {
+  $('wf').classList.remove('live');
+  $('spCard').classList.remove('live');
+  $('spDot').classList.add('off');
+  $('spStatus').textContent    = 'John has spoken';
+  $('replayBtn').style.display = 'inline-flex';
+
+  document.querySelectorAll('.opt').forEach(b => b.classList.remove('disabled-opt'));
+  if (!s.q || sel !== null) $('btnNext').disabled = false;
+}
+
+function replayAudio() {
+  const s = STEPS[step];
+  $('replayBtn').style.display = 'none';
+  $('spQuote').textContent     = s.quote;
+  $('spStatus').textContent    = 'John is speaking…';
+  $('spDot').classList.remove('off');
+  $('spCard').classList.add('live');
+  $('wf').classList.add('live');
+  document.querySelectorAll('.opt').forEach(b => b.classList.add('disabled-opt'));
+  $('btnNext').disabled = true;
+  playAudio(s.audio, s.dur, () => onConvAudioDone(s));
+}
+
+function pick(idx, btn) {
+  sel = idx;
+  document.querySelectorAll('.opt').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  if (!playing) $('btnNext').disabled = false;
+}
+
+function goNext() {
+  const s = STEPS[step];
+
+  // Greeting step: no response audio, advance directly
+  if (!s.q) { advanceStep(); return; }
+
+  // Hide controls while John responds; keep options visible with selection shown
+  $('btnNext').style.display   = 'none';
+  $('replayBtn').style.display = 'none';
+  document.querySelectorAll('.opt').forEach(b => b.classList.add('disabled-opt'));
+
+  // Show John's response to the chosen option
+  const opt = s.opts[sel];
+  $('spQuote').textContent  = opt.responseText;
+  $('spStatus').textContent = 'John is speaking…';
+  $('spDot').classList.remove('off');
+  $('spCard').classList.add('live');
+  $('wf').classList.add('live');
+
+  playAudio(opt.responseAudio, opt.responseDur, () => {
+    if (s.transitionAudio) {
+      // 2-second breath before the transition audio
+      setTimeout(() => {
+        $('spQuote').textContent = s.transitionText;
+        playAudio(s.transitionAudio, s.transitionDur, advanceStep);
+      }, 2000);
+    } else {
+      advanceStep();
+    }
+  });
+}
+
+function advanceStep() {
+  // Fade out content, then load the next step
+  const wrap = document.querySelector('.conv-wrap');
+  wrap.style.transition = 'opacity .22s ease';
+  wrap.style.opacity    = '0';
+  setTimeout(() => {
+    wrap.style.opacity    = '';
+    wrap.style.transition = '';
+    if (step < STEPS.length - 1) loadStep(step + 1);
+    else showResult();
+  }, 240);
+}
+
+// ── RESULT ───────────────────────────────────────────────────────────
+function showResult() {
+  $('rCity').textContent    = DEST.city;
+  $('rCountry').textContent = DEST.country;
+
+  $('rTags').innerHTML = DEST.tags.map(t =>
+    `<div class="res-tag">
+       <span class="res-tag-ico">${t.e}</span>
+       <span class="res-tag-lbl">${t.l}</span>
+     </div>`
+  ).join('');
+
+  $('rSpQuote').textContent = DEST.quote;
+  $('asQuote').textContent  = DEST.quote;
+
+  $('rMeta').innerHTML = DEST.meta.map(m =>
+    `<div class="meta-item"><span>${m.e}</span><span>${m.l}</span></div>`
+  ).join('');
+
+  $('rSpCard').style.display  = 'flex';
+  $('ariaSays').style.display = 'none';
+  $('rWf').classList.add('live');
+  $('rSpDot').classList.remove('off');
+
+  setNav('dk');
+  showScreen('s-result');
+
+  playAudio('au-result', DEST.audioDur, () => {
+    $('rWf').classList.remove('live');
+    $('rSpDot').classList.add('off');
+    $('rSpCard').style.display  = 'none';
+    $('ariaSays').style.display = 'flex';
+  });
+}
+
+// ── SURVEY ───────────────────────────────────────────────────────────
+function goSurvey() {
+  if (!SURVEY_URL || SURVEY_URL === '#') {
+    alert(
+      'Survey link not yet configured.\n\n' +
+      'Open index.html and update the SURVEY_URL constant\n' +
+      'at the top of the <script> section with your survey URL.'
+    );
+    return;
+  }
+  window.location.href = SURVEY_URL;
+}
+</script>
+</body>
+</html>
