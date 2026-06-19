@@ -17,4 +17,3 @@ How does smiling prosody in an artificial voice influence users' perceptions of 
 - **H1:** A smiling voice will be perceived as warmer than a neutral voice.
 - **H2:** A smiling voice will be perceived as more realistic than a neutral voice.
 - **H3:** A smiling voice will be perceived as more trustworthy than a neutral voice.
-**Keywords:** Artificial Voices, Trust, Realism, Warmth, Human-Computer Interaction, TTS, Pitch
