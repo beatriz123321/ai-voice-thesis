@@ -12,7 +12,7 @@ This thesis investigates how smiling prosody in an artificial voice affects user
 2. **Study 2 — Voice Interaction and Perception Survey (N = 48):** Using the selected voice, participants completed a website-based travel-planning interaction under two conditions — a neutral voice and a smiling voice — and rated their perceptions using subscales of the Voice Experience Inventory (VOXI).
 
 **Research question:**
-How does smiling prosody in an artificial voice influence users' perceptions of warmth, realism, and trust in the AI system?
+How does vocal expressiveness in an artificial voice influence users’ perceptions of comfort, anthropomorphism, and trustworthiness in an AI system?
  
 **Hypotheses:**
 - **H1:** An expressive voice will score higher on perceived comfort than a neutral voice.
