@@ -6,7 +6,7 @@ Master's thesis submitted in partial fulfillment of the degree of Master of Scie
 
 ## Overview
  
-This thesis investigates how smiling prosody in an artificial voice affects users' perceptions of comfort, anthropomorphism, and trustworthiness during a voice-based AI interaction. It uses a two-stage quantitative design built around a fictional AI travel assistant, "John":
+This thesis investigates how an expressive voice in an artificial voice affects users' perceptions of comfort, anthropomorphism, and trustworthiness during a voice-based AI interaction. It uses a two-stage quantitative design built around a fictional AI travel assistant, "John":
  
 1. **Study 1 — Voice Preference Survey (N = 17):** Participants rated and ranked eight ElevenLabs-generated voices (four female, four male) to select the most suitable voice for the main experiment.
 2. **Study 2 — Voice Interaction and Perception Survey (N = 48):** Using the selected voice, participants completed a website-based travel-planning interaction under two conditions — a neutral voice and a smiling voice — and rated their perceptions using subscales of the Voice Experience Inventory (VOXI).
